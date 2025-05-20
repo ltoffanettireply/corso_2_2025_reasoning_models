@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .profile-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 48px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .profile-username {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .profile-email {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .profile-body {
+            padding: 30px;
+        }
+        
+        .profile-section {
+            margin-bottom: 30px;
+        }
+        
+        .profile-section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .profile-info-item {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .profile-info-label {
+            width: 150px;
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+        
+        .profile-info-value {
+            flex: 1;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        
+        .btn-edit-profile {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-logout {
+            background-color: #e74c3c;
+        }
+        
+        .timestamp {
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-laptop"></i> Tech Reviews</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/category/1">Smartphone</a></li>
+                    <li><a href="/category/2">Computer</a></li>
+                    <li><a href="/category/3">Audio</a></li>
+                </ul>
+            </nav>
+            <div class="user-profile-button">
+                <a href="/profile" class="user-avatar active">
+                    {{ user.username[0:1] | upper }}
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="profile-section">
+        <div class="container">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        {{ user.username[0:1] | upper }}
+                    </div>
+                    <h2 class="profile-username">{{ user.username }}</h2>
+                    <p class="profile-email">{{ user.email }}</p>
+                </div>
+                
+                <div class="profile-body">
+                    <div class="profile-section">
+                        <h2>Informazioni Account</h2>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Username:</div>
+                            <div class="profile-info-value">{{ user.username }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Email:</div>
+                            <div class="profile-info-value">{{ user.email }}</div>
+                        </div>
+                        <div class="profile-info-item">
+                            <div class="profile-info-label">Data iscrizione:</div>
+                            <div class="profile-info-value timestamp">{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h2>Le mie recensioni</h2>
+                        {% if user_reviews %}
+                            <div class="user-reviews">
+                                {% for review in user_reviews %}
+                                <div class="user-review-item">
+                                    <div class="review-info">
+                                        <h3>{{ review.title }}</h3>
+                                        <div class="review-meta">
+                                            <div class="rating">
+                                                {% for i in range(5) %}
+                                                    {% if i < review.rating %}
+                                                        <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            <span class="product-name">
+                                                <a href="/product/{{ review.product_id }}">{{ review.model }}</a>
+                                            </span>
+                                            <span class="review-date">{{ review.created_at.strftime('%d/%m/%Y') }}</span>
+                                        </div>
+                                        <p class="review-text">{{ review.description[:150] + '...' if review.description|length > 150 else review.description }}</p>
+                                    </div>                                    <div class="review-actions">
+                                        <a href="/product/{{ review.product_id }}#review-{{ review.id }}" class="btn-small btn-view">Vedi</a>
+                                        <a href="/edit_review/{{ review.id }}" class="btn-small btn-edit">Modifica</a>
+                                        <a href="#" class="btn-small btn-delete" onclick="if(confirm('Sei sicuro di voler eliminare questa recensione?')) { document.getElementById('delete-form-{{ review.id }}').submit(); return false; }">Elimina</a>
+                                        <form id="delete-form-{{ review.id }}" method="post" action="/delete_review/{{ review.id }}" style="display: none;"></form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>Non hai ancora scritto recensioni.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <a href="/profile/edit" class="btn btn-edit-profile">Modifica Profilo</a>
+                        <a href="/logout" class="btn btn-logout">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Tech Reviews</h3>
+                    <p>La tua fonte affidabile per recensioni tecnologiche imparziali e approfondite.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Link rapidi</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/category/1">Smartphone</a></li>
+                        <li><a href="/category/2">Computer</a></li>
+                        <li><a href="/category/3">Audio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Contattaci</h3>
+                    <p><i class="fas fa-envelope"></i> info@techreviews.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Tech Reviews - Tutti i diritti riservati</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+</body>
+</html>

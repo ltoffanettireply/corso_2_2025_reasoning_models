@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/fix.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .profile-edit-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .profile-edit-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .profile-edit-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .profile-edit-header p {
+            opacity: 0.9;
+        }
+        
+        .profile-edit-body {
+            padding: 30px;
+        }
+        
+        .profile-edit-section {
+            margin-bottom: 40px;
+        }
+        
+        .profile-edit-section h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .password-strength {
+            margin-top: 5px;
+            height: 5px;
+            background-color: #eee;
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        .password-strength-meter {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .password-feedback {
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--dark-gray);
+        }
+        
+        .btn-update {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-update:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+        
+        .form-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: white;
+        }
+        
+        .alert-danger {
+            background-color: #e74c3c;
+        }
+        
+        .alert-success {
+            background-color: #2ecc71;
+        }
+        
+        .form-note {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-laptop"></i> Tech Reviews</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/category/1">Smartphone</a></li>
+                    <li><a href="/category/2">Computer</a></li>
+                    <li><a href="/category/3">Audio</a></li>
+                </ul>
+            </nav>
+            <div class="user-profile-button">
+                <a href="/profile" class="user-avatar active">
+                    {{ user.username[0:1] | upper }}
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="profile-edit-section">
+        <div class="container">
+            <div class="profile-edit-container">
+                <div class="profile-edit-header">
+                    <h2>Modifica Profilo</h2>
+                    <p>Aggiorna le tue informazioni personali</p>
+                </div>
+                
+                {% if error_email %}
+                <div class="alert alert-danger">
+                    {{ error_email }}
+                </div>
+                {% endif %}
+                
+                {% if success_email %}
+                <div class="alert alert-success">
+                    {{ success_email }}
+                </div>
+                {% endif %}
+                
+                {% if error_password %}
+                <div class="alert alert-danger">
+                    {{ error_password }}
+                </div>
+                {% endif %}
+                
+                {% if success_password %}
+                <div class="alert alert-success">
+                    {{ success_password }}
+                </div>
+                {% endif %}
+                
+                <div class="profile-edit-body">
+                    <div class="profile-edit-section">
+                        <h3>Cambia Email</h3>
+                        <form action="/profile/edit/email" method="post">
+                            <div class="form-group">
+                                <label for="current_email">Email Attuale</label>
+                                <input type="email" id="current_email" value="{{ user.email }}" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="new_email">Nuova Email</label>
+                                <input type="email" id="new_email" name="new_email" required placeholder="Inserisci la nuova email">
+                            </div>
+                            <div class="form-group">
+                                <label for="password_email">Password (per conferma)</label>
+                                <input type="password" id="password_email" name="password" required placeholder="Inserisci la tua password attuale">
+                            </div>
+                            <div class="form-note">
+                                <i class="fas fa-info-circle"></i> Dopo il cambio dell'email, dovrai accedere nuovamente.
+                            </div>
+                            <div class="form-buttons">
+                                <a href="/profile" class="btn-cancel">Annulla</a>
+                                <button type="submit" class="btn-update">Aggiorna Email</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="profile-edit-section">
+                        <h3>Cambia Password</h3>
+                        <form action="/profile/edit/password" method="post">
+                            <div class="form-group">
+                                <label for="current_password">Password Attuale</label>
+                                <input type="password" id="current_password" name="current_password" required placeholder="Inserisci la tua password attuale">
+                            </div>
+                            <div class="form-group">
+                                <label for="new_password">Nuova Password</label>
+                                <input type="password" id="new_password" name="new_password" required placeholder="Inserisci la nuova password">
+                                <div class="password-strength">
+                                    <div class="password-strength-meter" id="passwordStrengthMeter"></div>
+                                </div>
+                                <div class="password-feedback" id="passwordFeedback"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm_password">Conferma Password</label>
+                                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Conferma la nuova password">
+                            </div>
+                            <div class="form-buttons">
+                                <a href="/profile" class="btn-cancel">Annulla</a>
+                                <button type="submit" class="btn-update">Aggiorna Password</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Tech Reviews</h3>
+                    <p>La tua fonte affidabile per recensioni tecnologiche imparziali e approfondite.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Link rapidi</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/category/1">Smartphone</a></li>
+                        <li><a href="/category/2">Computer</a></li>
+                        <li><a href="/category/3">Audio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Contattaci</h3>
+                    <p><i class="fas fa-envelope"></i> info@techreviews.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Tech Reviews - Tutti i diritti riservati</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Controllo forza password
+            const passwordInput = document.getElementById('new_password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const passwordStrengthMeter = document.getElementById('passwordStrengthMeter');
+            const passwordFeedback = document.getElementById('passwordFeedback');
+            const passwordForm = document.querySelector('form[action="/profile/edit/password"]');
+            
+            // Funzione per calcolare la forza della password
+            function checkPasswordStrength(password) {
+                let strength = 0;
+                const feedback = [];
+                
+                // Lunghezza minima
+                if (password.length < 8) {
+                    feedback.push('La password deve contenere almeno 8 caratteri');
+                } else {
+                    strength += 25;
+                }
+                
+                // Contiene numeri
+                if (/\d/.test(password)) {
+                    strength += 25;
+                } else {
+                    feedback.push('Aggiungi dei numeri');
+                }
+                
+                // Contiene lettere minuscole e maiuscole
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) {
+                    strength += 25;
+                } else {
+                    feedback.push('Usa sia lettere maiuscole che minuscole');
+                }
+                
+                // Contiene caratteri speciali
+                if (/[^A-Za-z0-9]/.test(password)) {
+                    strength += 25;
+                } else {
+                    feedback.push('Aggiungi caratteri speciali');
+                }
+                
+                return {
+                    strength: strength,
+                    feedback: feedback.join('. ')
+                };
+            }
+            
+            // Aggiorna l'indicatore di forza password quando l'utente digita
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const result = checkPasswordStrength(this.value);
+                    
+                    // Aggiorna l'indicatore visivo
+                    passwordStrengthMeter.style.width = result.strength + '%';
+                    
+                    // Imposta il colore in base alla forza
+                    if (result.strength <= 25) {
+                        passwordStrengthMeter.style.backgroundColor = '#e74c3c'; // Rosso
+                    } else if (result.strength <= 50) {
+                        passwordStrengthMeter.style.backgroundColor = '#f39c12'; // Arancione
+                    } else if (result.strength <= 75) {
+                        passwordStrengthMeter.style.backgroundColor = '#f1c40f'; // Giallo
+                    } else {
+                        passwordStrengthMeter.style.backgroundColor = '#2ecc71'; // Verde
+                    }
+                    
+                    // Mostra feedback
+                    passwordFeedback.textContent = result.feedback;
+                });
+            }
+            
+            // Controllo corrispondenza password
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', function(e) {
+                    const password = passwordInput.value;
+                    const confirmPassword = confirmPasswordInput.value;
+                    
+                    if (password !== confirmPassword) {
+                        e.preventDefault();
+                        alert('Le password non corrispondono.');
+                        confirmPasswordInput.focus();
+                    }
+                    
+                    // Controllo forza minima password
+                    const strength = checkPasswordStrength(password).strength;
+                    if (strength < 50) {
+                        e.preventDefault();
+                        alert('La password è troppo debole. Per favore, scegli una password più sicura.');
+                        passwordInput.focus();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

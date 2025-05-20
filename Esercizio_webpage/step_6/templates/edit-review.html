@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifica Recensione - Tech Reviews</title>    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .review-form-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .review-form-header {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .review-form-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .review-form-body {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .rating-selector {
+            margin-top: 10px;
+        }
+        
+        .rating-selector i {
+            font-size: 24px;
+            color: #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .rating-selector i.active {
+            color: var(--accent-color);
+        }
+        
+        .rating-selector i:hover,
+        .rating-selector i:hover ~ i {
+            transform: scale(1.2);
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .form-buttons .btn {
+            padding: 12px 25px;
+        }
+        
+        .btn-cancel {
+            background-color: #95a5a6;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .product-info {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .product-info h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+        
+        .message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-laptop"></i> Tech Reviews</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/category/1">Smartphone</a></li>
+                    <li><a href="/category/2">Computer</a></li>
+                    <li><a href="/category/3">Audio</a></li>
+                </ul>
+            </nav>
+            <div class="user-profile-button">
+                <a href="/profile" class="user-avatar active">
+                    {{ user.username[0:1] | upper }}
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="review-form-container">
+            <div class="review-form-header">
+                <h2>Modifica La Tua Recensione</h2>
+                <p>Aggiorna la tua opinione su {{ review.model }}</p>
+            </div>
+            
+            <div class="review-form-body">
+                {% if error %}
+                    <div class="message error-message">
+                        <p>{{ error }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if success %}
+                    <div class="message success-message">
+                        <p>{{ success }}</p>
+                    </div>
+                {% endif %}
+                
+                <div class="product-info">
+                    <h3>{{ review.model }}</h3>
+                    <p>Prodotto ID: {{ review.product_id }}</p>
+                </div>
+                
+                <form action="/edit_review/{{ review.id }}" method="post">
+                    <div class="form-group">
+                        <label for="title">Titolo</label>
+                        <input type="text" id="title" name="title" class="form-control" value="{{ review.title }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Valutazione</label>
+                        <div class="rating-selector">
+                            <input type="hidden" id="rating" name="rating" value="{{ review.rating }}">
+                            {% for i in range(1, 6) %}
+                                <i class="fas fa-star {% if i <= review.rating %}active{% endif %}" data-rating="{{ i }}"></i>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Descrizione</label>
+                        <textarea id="description" name="description" class="form-control" rows="8" required>{{ review.description }}</textarea>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <a href="/profile" class="btn btn-cancel">Annulla</a>
+                        <button type="submit" class="btn">Aggiorna Recensione</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Tech Reviews</h3>
+                    <p>La tua fonte affidabile per recensioni tecnologiche imparziali e approfondite.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Link rapidi</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/category/1">Smartphone</a></li>
+                        <li><a href="/category/2">Computer</a></li>
+                        <li><a href="/category/3">Audio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Contattaci</h3>
+                    <p><i class="fas fa-envelope"></i> info@techreviews.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Tech Reviews - Tutti i diritti riservati</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Script per la selezione delle stelle nella valutazione
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.rating-selector i');
+            const ratingInput = document.getElementById('rating');
+            
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = this.getAttribute('data-rating');
+                    ratingInput.value = value;
+                    
+                    // Resetta tutte le stelle
+                    stars.forEach(s => s.classList.remove('active'));
+                    
+                    // Attiva le stelle fino a quella cliccata
+                    stars.forEach(s => {
+                        if (s.getAttribute('data-rating') <= value) {
+                            s.classList.add('active');
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseover', function() {
+                    const value = this.getAttribute('data-rating');
+                    
+                    // Evidenzia tutte le stelle fino a quella su cui è il mouse
+                    stars.forEach(s => {
+                        if (s.getAttribute('data-rating') <= value) {
+                            s.style.color = '#f39c12';
+                        } else {
+                            s.style.color = '#ddd';
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseout', function() {
+                    const currentRating = ratingInput.value;
+                    
+                    // Ripristina lo stato originale delle stelle
+                    stars.forEach(s => {
+                        if (s.getAttribute('data-rating') <= currentRating) {
+                            s.style.color = '#f39c12';
+                            s.classList.add('active');
+                        } else {
+                            s.style.color = '#ddd';
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

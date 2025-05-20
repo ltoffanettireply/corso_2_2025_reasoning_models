@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrati - Tech Reviews</title>    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .register-container {
+            max-width: 450px;
+            margin: 60px auto;
+            padding: 30px;
+            background-color: var(--white);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .register-header h2 {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .register-header p {
+            color: var(--dark-gray);
+        }
+        
+        .register-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .register-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        .register-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .register-form input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .register-form .btn-register {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 16px;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        .register-form .btn-register:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .register-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--dark-gray);
+            font-size: 15px;
+        }
+        
+        .register-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: white;
+        }
+        
+        .alert-danger {
+            background-color: #e74c3c;
+        }
+        
+        .alert-success {
+            background-color: #2ecc71;
+        }
+        
+        .password-strength {
+            margin-top: 5px;
+            height: 5px;
+            background-color: #eee;
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        .password-strength-meter {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .password-feedback {
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--dark-gray);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-laptop"></i> Tech Reviews</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/category/1">Smartphone</a></li>
+                    <li><a href="/category/2">Computer</a></li>
+                    <li><a href="/category/3">Audio</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <a href="/login" class="btn btn-login">Accedi</a>
+                <a href="/register" class="btn btn-register active">Registrati</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="register-section">
+        <div class="container">
+            <div class="register-container">
+                <div class="register-header">
+                    <h2>Crea un account</h2>
+                    <p>Registrati per scrivere recensioni e partecipare alla community</p>
+                </div>
+                
+                {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                {% if success %}
+                <div class="alert alert-success">
+                    {{ success }}
+                </div>
+                {% endif %}
+                
+                <form class="register-form" method="post" action="/register">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required placeholder="Scegli un username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="La tua email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Crea una password sicura">
+                        <div class="password-strength">
+                            <div class="password-strength-meter" id="passwordStrengthMeter"></div>
+                        </div>
+                        <div class="password-feedback" id="passwordFeedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password">Conferma Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Conferma la tua password">
+                    </div>
+                    
+                    <button type="submit" class="btn-register">Registrati</button>
+                </form>
+                
+                <div class="register-footer">
+                    <p>Hai già un account? <a href="/login">Accedi</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Tech Reviews</h3>
+                    <p>La tua fonte affidabile per recensioni tecnologiche imparziali e approfondite.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Link rapidi</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/category/1">Smartphone</a></li>
+                        <li><a href="/category/2">Computer</a></li>
+                        <li><a href="/category/3">Audio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Contattaci</h3>
+                    <p><i class="fas fa-envelope"></i> info@techreviews.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Tech Reviews - Tutti i diritti riservati</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Controllo forza password
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const passwordStrengthMeter = document.getElementById('passwordStrengthMeter');
+            const passwordFeedback = document.getElementById('passwordFeedback');
+            const registerForm = document.querySelector('.register-form');
+            
+            // Funzione per calcolare la forza della password
+            function checkPasswordStrength(password) {
+                let strength = 0;
+                const feedback = [];
+                
+                // Lunghezza minima
+                if (password.length < 8) {
+                    feedback.push('La password deve contenere almeno 8 caratteri');
+                } else {
+                    strength += 25;
+                }
+                
+                // Contiene numeri
+                if (/\d/.test(password)) {
+                    strength += 25;
+                } else {
+                    feedback.push('Aggiungi dei numeri');
+                }
+                
+                // Contiene lettere minuscole e maiuscole
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) {
+                    strength += 25;
+                } else {
+                    feedback.push('Usa sia lettere maiuscole che minuscole');
+                }
+                
+                // Contiene caratteri speciali
+                if (/[^A-Za-z0-9]/.test(password)) {
+                    strength += 25;
+                } else {
+                    feedback.push('Aggiungi caratteri speciali');
+                }
+                
+                return {
+                    strength: strength,
+                    feedback: feedback.join('. ')
+                };
+            }
+            
+            // Aggiorna l'indicatore di forza password quando l'utente digita
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const result = checkPasswordStrength(this.value);
+                    
+                    // Aggiorna l'indicatore visivo
+                    passwordStrengthMeter.style.width = result.strength + '%';
+                    
+                    // Imposta il colore in base alla forza
+                    if (result.strength <= 25) {
+                        passwordStrengthMeter.style.backgroundColor = '#e74c3c'; // Rosso
+                    } else if (result.strength <= 50) {
+                        passwordStrengthMeter.style.backgroundColor = '#f39c12'; // Arancione
+                    } else if (result.strength <= 75) {
+                        passwordStrengthMeter.style.backgroundColor = '#f1c40f'; // Giallo
+                    } else {
+                        passwordStrengthMeter.style.backgroundColor = '#2ecc71'; // Verde
+                    }
+                    
+                    // Mostra feedback
+                    passwordFeedback.textContent = result.feedback;
+                });
+            }
+            
+            // Controllo corrispondenza password
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    const password = passwordInput.value;
+                    const confirmPassword = confirmPasswordInput.value;
+                    
+                    if (password !== confirmPassword) {
+                        e.preventDefault();
+                        alert('Le password non corrispondono.');
+                        confirmPasswordInput.focus();
+                    }
+                    
+                    // Controllo forza minima password
+                    const strength = checkPasswordStrength(password).strength;
+                    if (strength < 50) {
+                        e.preventDefault();
+                        alert('La password è troppo debole. Per favore, scegli una password più sicura.');
+                        passwordInput.focus();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

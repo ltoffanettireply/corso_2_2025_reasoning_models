@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/review-sort.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-laptop"></i> Tech Reviews</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/category/1" {% if product.category_id == 1 %}class="active"{% endif %}>Smartphone</a></li>
+                    <li><a href="/category/2" {% if product.category_id == 2 %}class="active"{% endif %}>Computer</a></li>
+                    <li><a href="/category/3" {% if product.category_id == 3 %}class="active"{% endif %}>Audio</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="product-header">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="/">Home</a> &gt; 
+                <a href="/category/{{ product.category_id }}">{{ product.category.name }}</a> &gt; 
+                <span>{{ product.name }}</span>
+            </div>            <div class="product-detail">
+                <div class="product-info">
+                    <h1>{{ product.name }}</h1>
+                    <div class="product-meta">
+                        <span class="category-badge">{{ product.category.name }}</span>
+                        {% if reviews %}
+                            {% set avg_rating = (reviews|sum(attribute='rating') / reviews|length)|round(1) %}
+                            <div class="rating">
+                                {% for i in range(5) %}
+                                    {% if i < avg_rating|int %}
+                                        <i class="fas fa-star"></i>
+                                    {% elif (i + 0.5) < avg_rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% elif (i + 0.5) <= avg_rating %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span>{{ avg_rating }} ({{ reviews|length }} recensioni)</span>
+                            </div>
+                        {% else %}
+                            <div class="rating">
+                                <span>Nessuna recensione</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="product-description">
+                        <h2>Descrizione</h2>
+                        <p>{{ product.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>    <section class="reviews-section">
+        <div class="container">
+            <div class="reviews-header">
+                <h2>Recensioni degli utenti</h2>
+                
+                <div class="reviews-sort">
+                    <label for="sortReviews">Ordina per:</label>
+                    <select id="sortReviews" class="sort-dropdown" onchange="window.location.href='/product/{{ product.id }}?sort=' + this.value">
+                        <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Più recenti prima</option>
+                        <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Più vecchie prima</option>
+                        <option value="rating_desc" {% if sort == 'rating_desc' %}selected{% endif %}>Valutazione (più alta prima)</option>
+                        <option value="rating_asc" {% if sort == 'rating_asc' %}selected{% endif %}>Valutazione (più bassa prima)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="add-review">
+                <button id="showReviewForm" class="btn">Scrivi una recensione</button>
+                
+                <form id="reviewForm" class="review-form" style="display: none;">
+                    <h3>La tua recensione</h3>
+                    <div class="form-group">
+                        <label for="reviewTitle">Titolo</label>
+                        <input type="text" id="reviewTitle" name="title" required>
+                    </div>                    <div class="form-group">
+                        <label for="reviewDescription">Descrizione</label>
+                        <textarea id="reviewDescription" name="description" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewModel">Modello</label>
+                        <input type="text" id="reviewModel" name="model" required value="{{ product.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewRating">Valutazione</label>
+                        <div class="rating-select">
+                            <div class="stars">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" id="reviewRating" name="rating" value="" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewUser">Username</label>
+                        <input type="text" id="reviewUser" name="user" required>
+                    </div>
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <button type="submit" class="btn">Invia recensione</button>
+                </form>
+            </div>
+            
+            <div class="reviews-list">
+                {% if reviews %}
+                    {% for review in reviews %}                    <div class="review-item">
+                        <div class="review-header">
+                            <h3>{{ review.title }}</h3>
+                            <div class="rating">
+                                {% for i in range(5) %}
+                                    {% if i < review.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span>{{ review.rating }}</span>
+                            </div>
+                        </div>
+                        <div class="review-meta">
+                            <span class="model">{{ review.model }}</span>
+                            <span class="author">@{{ review.user }}</span>
+                            <span class="date">{{ review.created_at.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                        <div class="review-content">
+                            <p>{{ review.description }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-reviews">
+                        <p>Questo prodotto non ha ancora recensioni. Sii il primo a recensirlo!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Tech Reviews</h3>
+                    <p>La tua fonte affidabile per recensioni tecnologiche imparziali e approfondite.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Link rapidi</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/category/1">Smartphone</a></li>
+                        <li><a href="/category/2">Computer</a></li>
+                        <li><a href="/category/3">Audio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Contattaci</h3>
+                    <p><i class="fas fa-envelope"></i> info@techreviews.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Tech Reviews - Tutti i diritti riservati</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostra il form di recensione quando si clicca sul pulsante
+            const showReviewFormBtn = document.getElementById('showReviewForm');
+            const reviewForm = document.getElementById('reviewForm');
+            
+            if (showReviewFormBtn && reviewForm) {
+                showReviewFormBtn.addEventListener('click', function() {
+                    reviewForm.style.display = 'block';
+                    showReviewFormBtn.style.display = 'none';
+                });
+            }
+            
+            // Gestione della selezione delle stelle
+            const stars = document.querySelectorAll('.rating-select .stars i');
+            const ratingInput = document.getElementById('reviewRating');
+            
+            if (stars.length > 0 && ratingInput) {
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const rating = this.getAttribute('data-rating');
+                        ratingInput.value = rating;
+                        
+                        // Resetta tutte le stelle
+                        stars.forEach(s => s.className = 'far fa-star');
+                        
+                        // Imposta le stelle selezionate
+                        for (let i = 0; i < rating; i++) {
+                            stars[i].className = 'fas fa-star';
+                        }
+                    });
+                    
+                    star.addEventListener('mouseover', function() {
+                        const rating = this.getAttribute('data-rating');
+                        
+                        // Evidenzia le stelle al passaggio del mouse
+                        for (let i = 0; i < rating; i++) {
+                            stars[i].className = 'fas fa-star hover';
+                        }
+                    });
+                    
+                    star.addEventListener('mouseout', function() {
+                        const currentRating = ratingInput.value;
+                        
+                        // Resetta tutte le stelle
+                        stars.forEach(s => s.className = 'far fa-star');
+                        
+                        // Ripristina le stelle selezionate
+                        if (currentRating) {
+                            for (let i = 0; i < currentRating; i++) {
+                                stars[i].className = 'fas fa-star';
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // Gestione dell'invio del form
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                      const formData = {
+                        title: document.getElementById('reviewTitle').value,
+                        model: document.getElementById('reviewModel').value,
+                        user: document.getElementById('reviewUser').value,
+                        rating: parseInt(document.getElementById('reviewRating').value),
+                        description: document.getElementById('reviewDescription').value,
+                        product_id: parseInt(document.querySelector('input[name="product_id"]').value)
+                    };
+                    
+                    // Invio della recensione tramite API
+                    fetch('/api/reviews/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Errore nell\'invio della recensione');
+                    })
+                    .then(data => {
+                        // Ricarica la pagina per mostrare la nuova recensione
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Errore:', error);
+                        alert('Si è verificato un errore durante l\'invio della recensione. Riprova più tardi.');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
