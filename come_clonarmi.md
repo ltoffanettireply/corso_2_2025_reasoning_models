@@ -71,7 +71,7 @@ cd corso_2_2025_reasoning_models
 4. Crea un ambiente virtuale
 
 ```bash
-python -m venv venv
+python -m venv .venv
 ```
 
 5. Attiva l'ambiente virtuale
@@ -79,16 +79,16 @@ python -m venv venv
 - Da Windows (PowerShell)
 
 ```bash
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 - Da Windows (cmd)
 
 ```bash
-.\venv\Scripts\activate.bat
+.\.venv\Scripts\activate.bat
 ```
 - Da Linux/macOS
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 6. Installa le dipendenze necessarie
