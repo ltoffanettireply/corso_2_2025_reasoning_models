@@ -60,7 +60,7 @@ pip install -r requirements.txt
 3. Clona il repository
 
 ```bash
-git clone
+git clone https://github.com/ltoffanettireply/corso_2_2025_reasoning_models.git
 ```
 4. Entra nella cartella del progetto
 
