@@ -1,0 +1,86 @@
+/* Stili per il sistema di ordinamento delle recensioni */
+
+.reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.reviews-sort {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.reviews-sort label {
+    font-weight: 500;
+    color: var(--dark-gray);
+}
+
+.sort-dropdown {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: var(--white);
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    min-width: 220px;
+}
+
+.sort-dropdown:focus,
+.sort-dropdown:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Icona per il dropdown */
+.reviews-sort {
+    position: relative;
+}
+
+.sort-dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 25px;
+}
+
+.reviews-sort::after {
+    content: '\f0d7'; /* FontAwesome dropdown icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--dark-gray);
+}
+
+/* Stile attivo per l'opzione selezionata */
+.sort-dropdown option:checked {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .reviews-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .reviews-sort {
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .sort-dropdown {
+        width: 100%;
+    }
+}

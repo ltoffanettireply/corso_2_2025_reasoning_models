@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrivi Recensione - Tech Reviews</title>    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .review-form-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .review-form-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .review-form-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .review-form-body {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+        }
+        
+        .rating-select {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stars {
+            display: flex;
+            gap: 5px;
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        
+        .stars i {
+            cursor: pointer;
+            color: #ddd;
+        }
+        
+        .stars i.fas {
+            color: #f39c12;
+        }
+        
+        .stars i.hover {
+            color: #f1c40f;
+        }
+        
+        .form-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-submit:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: white;
+        }
+        
+        .alert-danger {
+            background-color: #e74c3c;
+        }
+        
+        .alert-success {
+            background-color: #2ecc71;
+        }
+        
+        .form-help-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-laptop"></i> Tech Reviews</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/category/1">Smartphone</a></li>
+                    <li><a href="/category/2">Computer</a></li>
+                    <li><a href="/category/3">Audio</a></li>
+                </ul>
+            </nav>
+            {% if user %}
+                <div class="user-profile-button">
+                    <a href="/profile" class="user-avatar {% if request.url.path == '/profile' %}active{% endif %}">
+                        {{ user.username[0:1] | upper }}
+                    </a>
+                </div>
+            {% else %}
+                <div class="auth-buttons">
+                    <a href="/login" class="btn btn-login">Accedi</a>
+                    <a href="/register" class="btn btn-register">Registrati</a>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="review-form-section">
+        <div class="container">
+            <div class="review-form-container">
+                <div class="review-form-header">
+                    <h2>Scrivi una Recensione</h2>
+                    <p>Condividi la tua esperienza con la community</p>
+                </div>
+                
+                {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                {% if success %}
+                <div class="alert alert-success">
+                    {{ success }}
+                </div>
+                {% endif %}
+                
+                <div class="review-form-body">
+                    <form id="reviewForm" method="post" action="/submit-review">
+                        <div class="form-group">
+                            <label for="reviewTitle">Titolo</label>
+                            <input type="text" id="reviewTitle" name="title" required value="{{ review_title if review_title else '' }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reviewDescription">Descrizione</label>
+                            <textarea id="reviewDescription" name="description" required>{{ review_description if review_description else '' }}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productName">Nome Prodotto</label>
+                            <input type="text" id="productName" name="product_name" required value="{{ initial_product_name if initial_product_name else '' }}">
+                            <p class="form-help-text">Inserisci il nome del prodotto che stai recensendo, anche se non è ancora presente nel nostro catalogo</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productCategory">Categoria</label>
+                            <select id="productCategory" name="category_id" required>
+                                <option value="">Seleziona una categoria</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if initial_category_id and initial_category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reviewRating">Valutazione</label>
+                            <div class="rating-select">
+                                <div class="stars">
+                                    <i class="far fa-star" data-rating="1"></i>
+                                    <i class="far fa-star" data-rating="2"></i>
+                                    <i class="far fa-star" data-rating="3"></i>
+                                    <i class="far fa-star" data-rating="4"></i>
+                                    <i class="far fa-star" data-rating="5"></i>
+                                </div>
+                                <input type="hidden" id="reviewRating" name="rating" value="{{ review_rating if review_rating else '' }}" required>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="reviewUser" name="user" value="{{ user.username }}" required>
+                        
+                        <div class="form-buttons">
+                            {% if request.query_params.get('back_url') %}
+                                <a href="{{ request.query_params.get('back_url') }}" class="btn-cancel">Annulla</a>
+                            {% else %}
+                                <a href="/" class="btn-cancel">Annulla</a>
+                            {% endif %}
+                            <button type="submit" class="btn-submit">Invia Recensione</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Tech Reviews</h3>
+                    <p>La tua fonte affidabile per recensioni tecnologiche imparziali e approfondite.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Link rapidi</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/category/1">Smartphone</a></li>
+                        <li><a href="/category/2">Computer</a></li>
+                        <li><a href="/category/3">Audio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Contattaci</h3>
+                    <p><i class="fas fa-envelope"></i> info@techreviews.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Tech Reviews - Tutti i diritti riservati</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestione della selezione delle stelle
+            const stars = document.querySelectorAll('.rating-select .stars i');
+            const ratingInput = document.getElementById('reviewRating');
+            
+            if (stars.length > 0 && ratingInput) {
+                // Imposta le stelle iniziali se c'è un valore predefinito
+                const initialRating = ratingInput.value;
+                if (initialRating) {
+                    for (let i = 0; i < initialRating; i++) {
+                        stars[i].className = 'fas fa-star';
+                    }
+                }
+                
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const rating = this.getAttribute('data-rating');
+                        ratingInput.value = rating;
+                        
+                        // Resetta tutte le stelle
+                        stars.forEach(s => s.className = 'far fa-star');
+                        
+                        // Imposta le stelle selezionate
+                        for (let i = 0; i < rating; i++) {
+                            stars[i].className = 'fas fa-star';
+                        }
+                    });
+                    
+                    star.addEventListener('mouseover', function() {
+                        const rating = this.getAttribute('data-rating');
+                        
+                        // Evidenzia le stelle al passaggio del mouse
+                        for (let i = 0; i < rating; i++) {
+                            stars[i].className = 'fas fa-star hover';
+                        }
+                    });
+                    
+                    star.addEventListener('mouseout', function() {
+                        const currentRating = ratingInput.value;
+                        
+                        // Resetta tutte le stelle
+                        stars.forEach(s => s.className = 'far fa-star');
+                        
+                        // Ripristina le stelle selezionate
+                        if (currentRating) {
+                            for (let i = 0; i < currentRating; i++) {
+                                stars[i].className = 'fas fa-star';
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // Validazione del form
+            const reviewForm = document.getElementById('reviewForm');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    // Controllo che il rating sia stato selezionato
+                    if (!ratingInput.value) {
+                        e.preventDefault();
+                        alert('Seleziona una valutazione (da 1 a 5 stelle)');
+                        return;
+                    }
+                    
+                    // Controllo che sia stata selezionata una categoria
+                    const categorySelect = document.getElementById('productCategory');
+                    if (!categorySelect.value) {
+                        e.preventDefault();
+                        alert('Seleziona una categoria per il prodotto');
+                        return;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

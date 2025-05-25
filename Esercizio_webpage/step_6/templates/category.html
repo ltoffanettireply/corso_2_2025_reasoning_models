@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><i class="fas fa-laptop"></i> Tech Reviews</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/category/1" {% if category.id == 1 %}class="active"{% endif %}>Smartphone</a></li>
+                    <li><a href="/category/2" {% if category.id == 2 %}class="active"{% endif %}>Computer</a></li>
+                    <li><a href="/category/3" {% if category.id == 3 %}class="active"{% endif %}>Audio</a></li>
+                </ul>
+        </nav>
+        {% if user %}
+            <div class="user-profile-button">
+                <a href="/profile" class="user-avatar {% if request.url.path == '/profile' %}active{% endif %}">
+                    {{ user.username[0:1] | upper }}
+                </a>
+            </div>
+        {% else %}
+            <div class="auth-buttons">
+                <a href="/login" class="btn btn-login {% if request.url.path == '/login' %}active{% endif %}">Accedi</a>
+                <a href="/register" class="btn btn-register {% if request.url.path == '/register' %}active{% endif %}">Registrati</a>
+            </div>
+        {% endif %}
+    </div>
+</header>
+
+    <section class="page-header">
+        <div class="container">
+            <h2>{{ category.name }}</h2>
+            <p>{{ category.description }}</p>
+        </div>
+    </section>
+
+    <section class="products-section">
+        <div class="container">
+            {% if products %}                <div class="products-grid">
+                    {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-content">
+                            <h3>{{ product.name }}</h3>
+                            <p>{{ product.description[:150] + '...' if product.description|length > 150 else product.description }}</p>
+                            <a href="/product/{{ product.id }}" class="read-more">Vedi recensioni</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-products">
+                    <p>Nessun prodotto disponibile in questa categoria.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="newsletter">
+        <div class="container">
+            <h2>Resta aggiornato sulle ultime recensioni</h2>
+            <p>Iscriviti alla nostra newsletter per ricevere aggiornamenti sui prodotti tech più recenti</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Inserisci la tua email">
+                <button type="submit" class="btn">Iscriviti</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Tech Reviews</h3>
+                    <p>La tua fonte affidabile per recensioni tecnologiche imparziali e approfondite.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Link rapidi</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/category/1">Smartphone</a></li>
+                        <li><a href="/category/2">Computer</a></li>
+                        <li><a href="/category/3">Audio</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section contact">
+                    <h3>Contattaci</h3>
+                    <p><i class="fas fa-envelope"></i> info@techreviews.it</p>
+                    <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Tech Reviews - Tutti i diritti riservati</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+</body>
+</html>
